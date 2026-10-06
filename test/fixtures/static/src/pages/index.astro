@@ -1,0 +1,19 @@
+---
+import "../styles/site.css";
+---
+
+<html lang="en">
+	<head>
+		<title>Fixture</title>
+	</head>
+	<body>
+		<p class="used">Hello</p>
+		<a href="/contact/">Contact</a>
+		<script>
+		document.body.classList.add("from-bundled-script");
+		</script>
+		<script is:inline>
+		document.body.classList.add("from-inline-script");
+		</script>
+	</body>
+</html>

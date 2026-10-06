@@ -1,0 +1,41 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24.x'
+          registry-url: 'https://npm.pkg.github.com'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Version check
+        run: |
+          package_json_version=$(node -p 'require("./package.json").version')
+          if [ "v$package_json_version" != "$GITHUB_REF_NAME" ]; then
+            echo "Version in package.json (v$package_json_version) does not match the tag ($GITHUB_REF_NAME)"
+            exit 1
+          fi
+
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GH_NPM_PUBLISH_TOKEN }}
