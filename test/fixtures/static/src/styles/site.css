@@ -1,0 +1,37 @@
+.used {
+	color: red;
+}
+
+.unused {
+	color: blue;
+}
+
+.from-bundled-script {
+	color: green;
+}
+
+.from-inline-script {
+	color: purple;
+}
+
+[data-open] {
+	outline: 1px solid;
+}
+
+.swatch-red {
+	background: red;
+}
+
+a[href$="/contact/"] {
+	font-weight: bold;
+}
+
+a[href$="/nowhere/"] {
+	font-style: italic;
+}
+
+@keyframes unused-spin {
+	to {
+		transform: rotate(1turn);
+	}
+}
