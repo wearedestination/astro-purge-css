@@ -8,21 +8,26 @@ on:
 
 permissions:
   contents: read
+  packages: read
 
 jobs:
   ci:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@wearedestination'
 
       - name: Install dependencies
         run: npm ci
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Biome
         run: npm run check
