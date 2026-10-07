@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: read
-  packages: read
 
 jobs:
   ci:
@@ -21,13 +20,9 @@ jobs:
         uses: actions/setup-node@v7
         with:
           node-version: '24.x'
-          registry-url: 'https://npm.pkg.github.com'
-          scope: '@wearedestination'
 
       - name: Install dependencies
         run: npm ci
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Biome
         run: npm run check

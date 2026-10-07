@@ -9,21 +9,15 @@ classes they add at runtime are kept as long as they appear in the script whole.
 
 ## Installation
 
-The package is published to GitHub Packages, so the project needs an `.npmrc` that points the scope there:
-
-```ini
-@wearedestination:registry=https://npm.pkg.github.com
-```
-
 ```console
-pnpm add -D @wearedestination/astro-purge-css
+pnpm add -D @destination/astro-purge-css
 ```
 
 ## Usage
 
 ```js
 // astro.config.mjs
-import purgeCss from "@wearedestination/astro-purge-css";
+import purgeCss from "@destination/astro-purge-css";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
@@ -60,4 +54,8 @@ npm test
 The tests build the sites in `test/fixtures` with Astro and check their output.
 
 To release, bump `version` in `package.json`, commit, and push a matching `v<version>` tag. The publish workflow
-tests the package and publishes it to GitHub Packages with the workflow's own `GITHUB_TOKEN`.
+tests the package and publishes it to npm through trusted publishing (GitHub OIDC), so it needs no token.
+
+## License
+
+MIT
