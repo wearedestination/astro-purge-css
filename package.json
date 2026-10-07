@@ -1,6 +1,6 @@
 {
 	"name": "@destination/astro-purge-css",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "Astro integration that removes unused CSS from a static build and inlines small stylesheets.",
 	"keywords": [
 		"astro",
