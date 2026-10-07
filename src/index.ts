@@ -57,7 +57,7 @@ export default function purgeCss({
 	let onDemand: string[] = [];
 
 	return {
-		name: "@wearedestination/astro-purge-css",
+		name: "@destination/astro-purge-css",
 		hooks: {
 			// Stylesheets Astro inlines itself can't be purged, so they're all
 			// emitted as files; the purged size then decides what's inlined.

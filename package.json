@@ -1,8 +1,21 @@
 {
-	"name": "@wearedestination/astro-purge-css",
+	"name": "@destination/astro-purge-css",
 	"version": "1.0.0",
 	"description": "Astro integration that removes unused CSS from a static build and inlines small stylesheets.",
-	"license": "UNLICENSED",
+	"keywords": [
+		"astro",
+		"astro-integration",
+		"purgecss",
+		"css"
+	],
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/wearedestination/astro-purge-css.git"
+	},
+	"bugs": {
+		"url": "https://github.com/wearedestination/astro-purge-css/issues"
+	},
 	"type": "module",
 	"exports": {
 		".": {
@@ -15,13 +28,6 @@
 	],
 	"engines": {
 		"node": ">=22.12.0"
-	},
-	"publishConfig": {
-		"registry": "https://npm.pkg.github.com"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/wearedestination/astro-purge-css.git"
 	},
 	"scripts": {
 		"build": "tsc",
