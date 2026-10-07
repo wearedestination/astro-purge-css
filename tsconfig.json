@@ -1,5 +1,6 @@
 {
-	"include": ["src"],
+	"include": ["src", "test", "vitest.config.ts"],
+	"exclude": ["test/fixtures"],
 	"compilerOptions": {
 		"lib": ["ESNext"],
 		"target": "ESNext",
@@ -11,10 +12,7 @@
 		"skipLibCheck": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"declaration": true,
-		"sourceMap": true,
-		"rootDir": "src",
-		"outDir": "dist",
+		"noEmit": true,
 		"types": ["node"]
 	}
 }
