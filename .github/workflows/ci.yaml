@@ -32,3 +32,17 @@ jobs:
 
       - name: Test
         run: npm test
+
+  # Aggregate gate with a stable name for branch protection to require,
+  # so jobs can be added or renamed without updating the required-check config.
+  ci-success:
+    name: CI Success
+    if: always()
+    needs: ci
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Fail if any job failed
+        if: needs.ci.result != 'success'
+        run: |
+          echo "ci result: ${{ needs.ci.result }}"
+          exit 1
