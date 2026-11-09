@@ -17,6 +17,8 @@ The tests build the sites in `test/fixtures` with Astro and check their output.
   add a fixture site under `test/fixtures`.
 - Update the README when an option or its behaviour changes.
 - CI runs the check, type-check and tests on every pull request, so run them locally first.
+- You're the author of every commit in your pull request, however it was written. Don't add `Co-Authored-By`
+  trailers or other credit for AI tools.
 
 ## Releasing
 
