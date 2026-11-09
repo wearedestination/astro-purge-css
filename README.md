@@ -42,6 +42,19 @@ immutable, and the purged CSS can change when only the content does.
 Every page must be prerendered. A page rendered on request has no HTML to scan, and its server code links
 stylesheets by their original names, so the build fails if any route isn't prerendered.
 
+## Compared to astro-purgecss
+
+[astro-purgecss](https://www.npmjs.com/package/astro-purgecss) is a more general PurgeCSS wrapper. This integration
+is narrower:
+
+- **Small stylesheets are still inlined.** Both integrations need Astro's `inlineStylesheets` set to `"never"`; this
+  one inlines stylesheets that are small after purging, through `inlineLimit`.
+- **HTML is parsed rather than matched with a regex**, so attribute values are read whole and selectors such as
+  `[href$="/contact/"]` are kept.
+- **Static sites only.** It fails the build rather than risk purging CSS a page rendered on request still needs. For
+  SSR, use astro-purgecss.
+- **Few options.** It exposes `safelist` and `dynamicAttributes` rather than every PurgeCSS option.
+
 ## Development
 
 ```console
