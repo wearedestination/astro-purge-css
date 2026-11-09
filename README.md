@@ -10,7 +10,7 @@ classes they add at runtime are kept as long as they appear in the script whole.
 ## Installation
 
 ```console
-pnpm add -D @destination/astro-purge-css
+npm install --save-dev @destination/astro-purge-css
 ```
 
 ## Usage
