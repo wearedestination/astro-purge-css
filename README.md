@@ -21,7 +21,12 @@ import purgeCss from "@destination/astro-purge-css";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-	integrations: [purgeCss({ inlineLimit: 12 * 1024 })],
+	integrations: [
+		purgeCss({
+			// Inline stylesheets that gzip to 12 KiB or less once purged; link the rest.
+			inlineLimit: 12 * 1024,
+		}),
+	],
 });
 ```
 
