@@ -61,6 +61,7 @@ is narrower:
 - **Few options.** It exposes `safelist` and `dynamicAttributes` rather than every PurgeCSS option.
 
 ## Contributing
+
 See [CONTRIBUTING.md](.github/CONTRIBUTING.md) for development and release steps.
 
 ## License
