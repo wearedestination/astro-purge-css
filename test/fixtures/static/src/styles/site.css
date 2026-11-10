@@ -35,3 +35,50 @@ a[href$="/nowhere/"] {
 		transform: rotate(1turn);
 	}
 }
+
+@font-face {
+	font-family: "Family Sans";
+	src: local("Family Sans");
+}
+
+@font-face {
+	font-family: "Shorthand Sans";
+	src: local("Shorthand Sans");
+}
+
+@font-face {
+	font-family: "Variable Sans";
+	src: local("Variable Sans");
+}
+
+@font-face {
+	font-family: "Orphan Sans", sans-serif;
+	src: local("Orphan Sans");
+}
+
+@font-face {
+	font-family: "Unnamed Sans";
+	src: local("Unnamed Sans");
+}
+
+:root {
+	--font-text: "Variable Sans", sans-serif;
+}
+
+body {
+	font: 1rem / 1.5 var(--font-text);
+}
+
+p {
+	font-family: "Family Sans", serif;
+}
+
+a {
+	font:
+		700 1rem "Shorthand Sans",
+		sans-serif;
+}
+
+.unused-font {
+	font-family: "Orphan Sans", sans-serif;
+}

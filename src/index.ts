@@ -4,6 +4,7 @@ import { basename, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 import type { AstroIntegration } from "astro";
+import postcss from "postcss";
 import { PurgeCSS, type UserDefinedSafelist } from "purgecss";
 import purgeHtml from "purgecss-from-html";
 
@@ -41,6 +42,48 @@ export interface Options {
 }
 
 const kib = (bytes: number) => `${(bytes / 1024).toFixed(1)} KiB`;
+
+/**
+ * Removes `@font-face` rules whose family no remaining declaration names.
+ * PurgeCSS's own `fontFace` option reads only `font-family`, so it drops a
+ * family named in the `font` shorthand or only in a custom property, as in
+ * `--font-text: Inter; font: 1rem var(--font-text)`. This reads all three. A
+ * custom property counts even if nothing uses it, which can keep a font but
+ * never drops one that's needed.
+ */
+function purgeFontFaces(css: string): string {
+	if (!css.includes("@font-face")) return css;
+	const root = postcss.parse(css);
+	const values: string[] = [];
+	root.walkDecls((decl) => {
+		const parent = decl.parent;
+		if (
+			parent?.type === "atrule" &&
+			(parent as postcss.AtRule).name === "font-face"
+		)
+			return;
+		if (
+			decl.prop === "font-family" ||
+			decl.prop === "font" ||
+			decl.prop.startsWith("--")
+		) {
+			values.push(decl.value);
+		}
+	});
+	root.walkAtRules("font-face", (rule) => {
+		let family = "";
+		rule.walkDecls("font-family", (decl) => {
+			family = decl.value.trim().replace(/^(["'])(.*)\1$/, "$2");
+		});
+		if (!family) return;
+		const escaped = family.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+		// Family names are case-insensitive, and the name may be quoted, or end a
+		// shorthand like `900 1rem/1 Inter`.
+		const named = new RegExp(`(^|[\\s,"'])${escaped}($|[\\s,"'!])`, "i");
+		if (!values.some((value) => named.test(value))) rule.remove();
+	});
+	return root.toString();
+}
 
 async function files(dir: string, ext: string): Promise<string[]> {
 	const entries = await readdir(dir, { recursive: true, withFileTypes: true });
@@ -105,22 +148,22 @@ export default function purgeCss({
 						safelist,
 						dynamicAttributes,
 						keyframes: true,
-						fontFace: true,
 					});
-					const gzipped = gzipSync(result.css).length;
-					const sizes = `${kib(before.length)} → ${kib(result.css.length)} (${kib(gzipped)} gzipped)`;
+					const after = purgeFontFaces(result.css);
+					const gzipped = gzipSync(after).length;
+					const sizes = `${kib(before.length)} → ${kib(after.length)} (${kib(gzipped)} gzipped)`;
 					await rm(file);
 					if (gzipped <= inlineLimit) {
-						inlined.set(basename(file), result.css);
+						inlined.set(basename(file), after);
 						logger.info(`${basename(file)}: ${sizes}, inlined`);
 						continue;
 					}
 					const hash = createHash("sha256")
-						.update(result.css)
+						.update(after)
 						.digest("base64url")
 						.slice(0, 8);
 					const name = basename(file).replace(/\.[\w-]+\.css$/, `.${hash}.css`);
-					await writeFile(join(assetsDir, name), result.css);
+					await writeFile(join(assetsDir, name), after);
 					renamed.set(basename(file), name);
 					logger.info(`${name}: ${sizes}`);
 				}

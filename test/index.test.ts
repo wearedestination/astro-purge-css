@@ -56,10 +56,23 @@ describe("a linked stylesheet", async () => {
 		expect(purged).toContain("[data-open]");
 	});
 
+	test("keeps font faces named by font-family, the font shorthand or a custom property", () => {
+		const families = [
+			...purged.matchAll(/@font-face\s*\{[^}]*font-family:\s*["']?([^;"'}]+)/g),
+		].map(([, family]) => family);
+		expect(families).toEqual([
+			"Family Sans",
+			"Shorthand Sans",
+			"Variable Sans",
+		]);
+	});
+
 	test("removes everything else", () => {
 		expect(purged).not.toContain(".unused");
 		expect(purged).not.toContain("/nowhere/");
 		expect(purged).not.toContain("unused-spin");
+		expect(purged).not.toContain("Orphan Sans");
+		expect(purged).not.toContain("Unnamed Sans");
 	});
 });
 
