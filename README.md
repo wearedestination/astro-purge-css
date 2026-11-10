@@ -7,6 +7,10 @@ It runs [PurgeCSS](https://purgecss.com/) over the built site rather than the so
 CMS content are kept. Scripts are scanned too, both those bundled into `_astro/` and those inline in pages, so
 classes they add at runtime are kept as long as they appear in the script whole.
 
+Unused `@keyframes` and `@font-face` rules are removed too. A font face is kept when a `font-family` or `font`
+declaration names its family, or any custom property does, so `--font-text: Inter` keeps Inter's `@font-face` even
+when it's only applied through `var(--font-text)`.
+
 ## Installation
 
 ```console
