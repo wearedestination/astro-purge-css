@@ -2,3 +2,4 @@
 /dist
 /test/fixtures/*/dist
 /test/fixtures/*/.astro
+/test/fixtures/*/node_modules
