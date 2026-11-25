@@ -25,20 +25,20 @@ import purgeCss from "@destination/astro-purge-css";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-	integrations: [
-		purgeCss({
-			// Inline stylesheets that gzip to 12 KiB or less once purged; link the rest.
-			inlineLimit: 12 * 1024,
-		}),
-	],
+  integrations: [
+    purgeCss({
+      // Inline stylesheets that gzip to 12 KiB or less once purged; link the rest.
+      inlineLimit: 12 * 1024,
+    }),
+  ],
 });
 ```
 
-| Option              | Default | Description                                                                                                                                                         |
-|---------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `inlineLimit`       | `0`     | Largest gzipped size, in bytes, of a purged stylesheet to inline into the pages that link it. `0` inlines nothing.                                                  |
+| Option              | Default | Description                                                                                                                                                       |
+| ------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `inlineLimit`       | `0`     | Largest gzipped size, in bytes, of a purged stylesheet to inline into the pages that link it. `0` inlines nothing.                                                |
 | `safelist`          | `[]`    | Selectors to keep that don't appear whole in any built file, such as class names a library builds from a prefix (`[/swiper-/]`). Passed to PurgeCSS's `safelist`. |
-| `dynamicAttributes` | `[]`    | Attributes scripts set on the page, so selectors on them are kept even when no built page has them (`["hidden", "aria-invalid"]`).                                  |
+| `dynamicAttributes` | `[]`    | Attributes scripts set on the page, so selectors on them are kept even when no built page has them (`["hidden", "aria-invalid"]`).                                |
 
 The integration sets Astro's `build.inlineStylesheets` to `"never"`, because a stylesheet Astro inlines itself can't
 be purged; `inlineLimit` takes its place.
