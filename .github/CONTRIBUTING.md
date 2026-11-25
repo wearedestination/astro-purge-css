@@ -9,12 +9,13 @@ npm run type-check
 npm test
 ```
 
-The tests build the sites in `test/fixtures` with Astro and check their output.
+`test/index.test.ts` builds the sites in `test/fixtures` with Astro and checks their output. The other test files
+unit test the module of the same name in `src`.
 
 ## Pull requests
 
 - Cover any change in behaviour with a test in `test/index.test.ts`. If the existing sites don't show the case,
-  add a fixture site under `test/fixtures`.
+  add a fixture site under `test/fixtures`. Edge cases of a module's own logic can go in its unit test instead.
 - Update the README when an option or its behaviour changes.
 - CI runs the check, type-check and tests on every pull request, so run them locally first.
 - You're the author of every commit in your pull request, however it was written. Don't add `Co-Authored-By`

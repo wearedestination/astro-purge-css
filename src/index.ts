@@ -4,9 +4,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 import type { AstroIntegration } from "astro";
-import { type AtRule, parse } from "postcss";
 import { PurgeCSS, type UserDefinedSafelist } from "purgecss";
 import purgeHtml from "purgecss-from-html";
+import { purgeFontFaces } from "./font-faces";
+import { rewriteStylesheets } from "./html";
 
 /**
  * Removes CSS that no built page uses.
@@ -43,48 +44,6 @@ export interface Options {
 
 const kib = (bytes: number) => `${(bytes / 1024).toFixed(1)} KiB`;
 
-/**
- * Removes `@font-face` rules whose family no remaining declaration names.
- * PurgeCSS's own `fontFace` option reads only `font-family`, so it drops a
- * family named in the `font` shorthand or only in a custom property, as in
- * `--font-text: Inter; font: 1rem var(--font-text)`. This reads all three. A
- * custom property counts even if nothing uses it, which can keep a font but
- * never drops one that's needed.
- */
-function purgeFontFaces(css: string): string {
-  if (!css.includes("@font-face")) {
-    return css;
-  }
-  const root = parse(css);
-  const values: string[] = [];
-  root.walkDecls((decl) => {
-    const parent = decl.parent;
-    if (parent?.type === "atrule" && (parent as AtRule).name === "font-face") {
-      return;
-    }
-    if (decl.prop === "font-family" || decl.prop === "font" || decl.prop.startsWith("--")) {
-      values.push(decl.value);
-    }
-  });
-  root.walkAtRules("font-face", (rule) => {
-    let family = "";
-    rule.walkDecls("font-family", (decl) => {
-      family = decl.value.trim().replace(/^(["'])(.*)\1$/, "$2");
-    });
-    if (!family) {
-      return;
-    }
-    const escaped = family.replaceAll(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
-    // Family names are case-insensitive, and the name may be quoted, or end a
-    // shorthand like `900 1rem/1 Inter`.
-    const named = new RegExp(`(^|[\\s,"'])${escaped}($|[\\s,"'!])`, "i");
-    if (!values.some((value) => named.test(value))) {
-      rule.remove();
-    }
-  });
-  return root.toString();
-}
-
 async function files(dir: string, ext: string): Promise<string[]> {
   const entries = await readdir(dir, { recursive: true, withFileTypes: true });
   return entries.filter((e) => e.isFile() && e.name.endsWith(ext)).map((e) => path.join(e.parentPath, e.name));
@@ -120,11 +79,14 @@ export default function purgeCss({
         const assetsDir = path.join(outDir, "_astro");
         const html = await files(outDir, ".html");
         const js = await files(assetsDir, ".js").catch(() => []);
+
         // The HTML extractor skips script contents, so a page's inline scripts
         // are scanned as JS.
         const inlineJs: { raw: string; extension: string }[] = [];
+
         for (const file of html) {
           const page = await readFile(file, "utf8");
+
           for (const [, raw] of page.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)) {
             if (raw.trim()) {
               inlineJs.push({ raw, extension: "js" });
@@ -134,8 +96,10 @@ export default function purgeCss({
 
         const renamed = new Map<string, string>();
         const inlined = new Map<string, string>();
+
         for (const file of await files(assetsDir, ".css").catch(() => [])) {
           const before = await readFile(file, "utf8");
+
           const [result] = await new PurgeCSS().purge({
             content: [...html, ...js, ...inlineJs],
             css: [{ raw: before }],
@@ -146,34 +110,32 @@ export default function purgeCss({
             dynamicAttributes,
             keyframes: true,
           });
+
           const after = purgeFontFaces(result.css);
           const gzipped = gzipSync(after).length;
           const sizes = `${kib(before.length)} → ${kib(after.length)} (${kib(gzipped)} gzipped)`;
+
           await rm(file);
+
           if (gzipped <= inlineLimit) {
             inlined.set(path.basename(file), after);
             logger.info(`${path.basename(file)}: ${sizes}, inlined`);
             continue;
           }
+
           const hash = createHash("sha256").update(after).digest("base64url").slice(0, 8);
           const name = path.basename(file).replace(/\.[\w-]+\.css$/, `.${hash}.css`);
+
           await writeFile(path.join(assetsDir, name), after);
+
           renamed.set(path.basename(file), name);
           logger.info(`${name}: ${sizes}`);
         }
 
         for (const file of html) {
           const page = await readFile(file, "utf8");
-          const updated = page
-            .replaceAll(/<link rel="stylesheet" href="\/_astro\/([\w.-]+\.css)">/g, (match, name) =>
-              inlined.has(name)
-                ? // A literal `</style` would end the element early.
-                  `<style>${inlined.get(name)?.replaceAll("</style", String.raw`<\/style`)}</style>`
-                : match,
-            )
-            .replaceAll(/\/_astro\/([\w.-]+\.css)/g, (match, name) =>
-              renamed.has(name) ? `/_astro/${renamed.get(name)}` : match,
-            );
+          const updated = rewriteStylesheets(page, inlined, renamed);
+
           if (updated !== page) {
             await writeFile(file, updated);
           }
